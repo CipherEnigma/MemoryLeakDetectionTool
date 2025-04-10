@@ -26,4 +26,14 @@ private:
     static mutex allocationMutex;
 };
 
+// Define proper macros for memory tracking
+#define TRACK_NEW(TYPE) ((TYPE*)MemoryTracker::allocate(sizeof(TYPE), __FILE__, __LINE__))
+#define TRACK_NEW_ARRAY(TYPE, COUNT) ((TYPE*)MemoryTracker::allocate(sizeof(TYPE) * (COUNT), __FILE__, __LINE__))
+#define TRACK_DELETE(PTR) do { MemoryTracker::deallocate(PTR); (PTR) = nullptr; } while(0)
+#define TRACK_DELETE_ARRAY(PTR) TRACK_DELETE(PTR) // Same implementation for simplicity
+
+
+// Macro to automatically capture file and line info
+#define new new(__FILE__, __LINE__)
+
 #endif
