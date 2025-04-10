@@ -1,0 +1,3 @@
+"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\memory_tracker.dir/objects.a
+C:\MinGW\bin\ar.exe qc CMakeFiles\memory_tracker.dir/objects.a @CMakeFiles\memory_tracker.dir\objects1.rsp
+C:\MinGW\bin\g++.exe -shared -o libmemory_tracker.dll -Wl,--out-implib,libmemory_tracker.dll.a -Wl,--major-image-version,0,--minor-image-version,0 -Wl,--whole-archive CMakeFiles\memory_tracker.dir/objects.a -Wl,--no-whole-archive @CMakeFiles\memory_tracker.dir\linkLibs.rsp
