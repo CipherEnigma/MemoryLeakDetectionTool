@@ -9,6 +9,5 @@ int main() {
     TRACK_DELETE(tracker);
     TRACK_DELETE_ARRAY(arr);
     
-    MemoryTracker::reportLeaks();
     return 0;
 }

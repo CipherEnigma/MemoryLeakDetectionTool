@@ -32,7 +32,16 @@ void MemoryTracker::reportLeaks() {
                  << ", Size: " << pair.second.size << " bytes\n";
         }
     }
-    else{
+    else {
         cout << "No memory leaks detected.\n";
     }
 }
+
+class MemoryLeakReporter {
+public:
+    ~MemoryLeakReporter() {
+        MemoryTracker::reportLeaks();
+    }
+};
+
+static MemoryLeakReporter memoryLeakReporter;
