@@ -4,6 +4,7 @@ Memory leaks are a common and critical issue in C++ applications, often leading 
 
 To use this run the following commands 
 g++ -o build/memory_leak_tool src/memory_tracker.cpp test/main.cpp
+
 ./build/memory_leak_tool
 
 This saves a log file inside the test folder and then using data in that file  plots a  graph.
