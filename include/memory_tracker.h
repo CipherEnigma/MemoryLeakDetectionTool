@@ -11,7 +11,7 @@ using namespace std;
 
 struct AllocationInfo {
     size_t size;
-    string file;
+    const char* file;
     int line;
 };
 
@@ -27,13 +27,15 @@ private:
 };
 
 // Macros for memory tracking
-#define TRACK_NEW(TYPE) ((TYPE*)MemoryTracker::allocate(sizeof(TYPE), __FILE__, __LINE__))
-#define TRACK_NEW_ARRAY(TYPE, COUNT) ((TYPE*)MemoryTracker::allocate(sizeof(TYPE) * (COUNT), __FILE__, __LINE__))
+#define TRACK_NEW(TYPE) ((TYPE*)MemoryTracker::allocate(sizeof(TYPE), _FILE, __LINE_))
+#define TRACK_NEW_ARRAY(TYPE, COUNT) ((TYPE*)MemoryTracker::allocate(sizeof(TYPE) * (COUNT), _FILE, __LINE_))
 #define TRACK_DELETE(PTR) do { MemoryTracker::deallocate(PTR); (PTR) = nullptr; } while(0)
-#define TRACK_DELETE_ARRAY(PTR) TRACK_DELETE(PTR) // Same implementation for simplicity
+#define TRACK_DELETE_ARRAY(PTR) TRACK_DELETE(PTR) 
 
 
 // Macro to automatically capture file and line info
-#define new new(__FILE__, __LINE__)
+#ifndef DISABLE_NEW_MACRO
+#define new new(_FILE, __LINE_)
+#endif
 
 #endif
