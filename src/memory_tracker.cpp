@@ -1,15 +1,23 @@
+#define DISABLE_NEW_MACRO
 #include "../include/memory_tracker.h"
+#undef DISABLE_NEW_MACRO
 #include <iostream>
-#include <cstddef>
+#include <iomanip>
+#include <unordered_map>
+#include <mutex>
 #include <cstdlib>
+#include <string>
+#include <fstream> 
 
 using namespace std;
 
-unordered_map<void *, AllocationInfo> MemoryTracker::allocations;
+
+unordered_map<void*, AllocationInfo> MemoryTracker::allocations;
 mutex MemoryTracker::allocationMutex;
 
-void *MemoryTracker::allocate(size_t size, const char *file, int line) {
-    void *ptr = malloc(size);
+//alocate memory and track it
+void* MemoryTracker::allocate(size_t size, const char* file, int line) {
+    void* ptr = malloc(size);
     if (ptr) {
         lock_guard<mutex> lock(allocationMutex);
         allocations[ptr] = {size, file, line};
@@ -17,26 +25,44 @@ void *MemoryTracker::allocate(size_t size, const char *file, int line) {
     return ptr;
 }
 
-void MemoryTracker::deallocate(void *ptr) {
+// Deallocate memory and remove it from tracking
+void MemoryTracker::deallocate(void* ptr) {
     lock_guard<mutex> lock(allocationMutex);
     allocations.erase(ptr);
     free(ptr);
 }
 
+// Report memory leaks
 void MemoryTracker::reportLeaks() {
     lock_guard<mutex> lock(allocationMutex);
+    ofstream logFile("leak_report.txt"); // Open log file for writing
+
     if (!allocations.empty()) {
         cout << "Memory Leaks Detected:\n";
-        for (const auto &pair : allocations) {
-            cout << "Leak at: " << pair.second.file << ":" << pair.second.line
-                 << ", Size: " << pair.second.size << " bytes\n";
+        logFile << "File,Line,Size\n"; // CSV header for Python script
+
+        for (const auto& pair : allocations) {
+            const AllocationInfo& info = pair.second;
+            cout << "Leak at: " << info.file << ":" << info.line
+                 << ", Size: " << info.size << " bytes\n";
+
+            // Write leak data to log file
+            logFile << info.file << "," << info.line << "," << info.size << "\n";
         }
-    }
-    else {
+    } else {
         cout << "No memory leaks detected.\n";
     }
+
+    logFile.close(); // Close the log file
+    cout << "Generating graph using Python...\n";
+    int result = system("python test/plot_leaks.py");
+    if (result != 0) {
+        cerr << "Error: Failed to execute Python script. Ensure Python is installed and added to PATH.\n";
+    }
+
 }
 
+// Destructor to automatically report leaks at program exit
 class MemoryLeakReporter {
 public:
     ~MemoryLeakReporter() {
@@ -44,4 +70,5 @@ public:
     }
 };
 
+// Static instance to ensure leaks are reported at program exit
 static MemoryLeakReporter memoryLeakReporter;
